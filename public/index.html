@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登记表导入台(两版 CSV)</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>登记表导入台</h1>
+  <p class="hint">
+    登记端有两版导出:旧版 v1(编号 / 姓名 / 单位,编号是数值),新版 v2(单位与部门拆开,编号保留前导零)。
+    接收时自动辨版本;单位必须命中映射才发布,否则拒收;修订映射后可重跑拒收行。
+    同一编号(如 123 与 0123)在两版交替导入时归并为同一人。
+  </p>
+
+  <section id="import-section">
+    <h2>1. 导入两版登记表</h2>
+    <div class="panels">
+      <div class="panel">
+        <h3>旧版 v1(数值编号)</h3>
+        <textarea id="csv-v1" rows="7" spellcheck="false">编号,姓名,单位
+123,张三,一车间
+45,李四,二车间
+678,王五,质检组</textarea>
+        <button id="btn-import-v1" type="button">导入旧版登记表</button>
+      </div>
+      <div class="panel">
+        <h3>新版 v2(前导零编号 + 部门列)</h3>
+        <textarea id="csv-v2" rows="7" spellcheck="false">编号,姓名,单位,部门
+0123,张三,一车间,装配线
+045,李四,二车间,机加工
+099,赵六,运输队,物流</textarea>
+        <button id="btn-import-v2" type="button">导入新版登记表</button>
+      </div>
+    </div>
+    <button id="btn-import-both" type="button">交替导入两版(旧 → 新 → 旧)</button>
+    <p id="import-message" class="message" role="status"></p>
+  </section>
+
+  <section id="mapping-section">
+    <h2>2. 单位映射(保存后自动重跑拒收行)</h2>
+    <table id="mapping-table">
+      <thead><tr><th>原始单位</th><th>目标单位</th><th>修订号</th><th>更新时间</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <div class="form-row">
+      <input id="map-alias" type="text" placeholder="原始单位,如 质检组">
+      <input id="map-canonical" type="text" placeholder="目标单位,如 质量部">
+      <button id="btn-save-mapping" type="button">保存映射并重跑拒收行</button>
+    </div>
+    <p id="mapping-message" class="message" role="status"></p>
+  </section>
+
+  <section id="result-section" data-evidence-result>
+    <h2>3. 业务结果</h2>
+    <div id="stats" class="stats"></div>
+    <h3>人员名册(同一编号已归并)</h3>
+    <table id="people-table">
+      <thead><tr><th>编号(归一)</th><th>姓名</th><th>单位</th><th>部门</th><th>见过的版本</th><th>来源行</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <h3>行级处理结果</h3>
+    <table id="rows-table">
+      <thead><tr><th>行</th><th>批次</th><th>版本</th><th>源行号</th><th>原始编号</th><th>姓名</th><th>状态</th><th>说明</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="provenance-section">
+    <h2>4. 行级来历</h2>
+    <p class="hint">点击「行级处理结果」中的任意一行,查看它从哪个批次、哪个版本进来,原始值是什么,用了哪一版映射,经历了几次处理尝试。</p>
+    <div id="provenance-detail" data-evidence-provenance>尚未选择行。</div>
+  </section>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
